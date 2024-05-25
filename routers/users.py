@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI()
+router = APIRouter(tags=["user"])
 
 # Este documento se inicia con pipenv run users
 
@@ -31,33 +31,33 @@ def search_user(id: int):
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@app.get("/users")
+@router.get("/users")
 async def users():
     return users_list
 
 
-@app.get("/user/{id}")
+@router.get("/user/{id}")
 async def user(id: int):
     return search_user(id)
 
 
-@app.get("/userquery/")
+@router.get("/userquery/")
 async def user_query(id: int):
     return search_user(id)
 
 
-@app.post("/user/")
+@router.post("/user/", response_model=User, status_code=201)
 async def user(user: User):
     userResult = list(
         filter(lambda userList: userList.id == user.id, users_list))
     if userResult:
         raise HTTPException(status_code=404, detail="User already exist")
     else:
-        users_list.append(user)
-        raise HTTPException(status_code=200, detail="User added succesfully!")
+        users_list.routerend(user)
+        raise HTTPException(status_code=201, detail="User added succesfully!")
 
 
-@app.put("/user/")
+@router.put("/user/")
 async def inser_user(user: User):
     found = False
     for index, saved_user in enumerate(users_list):
@@ -72,7 +72,7 @@ async def inser_user(user: User):
         raise HTTPException(status_code=404, detail="Error user not found")
 
 
-@app.delete("/user/{id}")
+@router.delete("/user/{id}")
 async def delete_user(id: int):
     found = False
     for index, saved_user in enumerate(users_list):
